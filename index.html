@@ -1,1 +1,730 @@
 
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Relatório de Carga – Base/Top</title>
+
+  <style>
+    :root{
+      --bg:#f4f4f4;
+      --card:#ffffff;
+      --muted:#6b6b6b;
+      --line:#d8d8d8;
+      --soft:#efefef;
+      --btn:#e9eaee;
+      --dark:#111;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      padding:16px;
+      background:var(--bg);
+      font-family: Arial, sans-serif;
+      color:#111;
+    }
+    .card{
+      background:var(--card);
+      border-radius:12px;
+      padding:16px;
+      box-shadow:0 2px 8px rgba(0,0,0,.08);
+      margin-bottom:14px;
+    }
+
+    /* ===== Header (tela) ===== */
+    .top-title{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      border-bottom:1px solid #e7e7e7;
+      padding-bottom:10px;
+      margin-bottom:12px;
+    }
+    .top-title .left{
+      font-size:18px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .top-title .right{
+      font-size:16px;
+      color:var(--muted);
+      text-align:right;
+      white-space:nowrap;
+    }
+
+    /* ===== Form ===== */
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    @media(max-width:720px){
+      .grid2{ grid-template-columns: 1fr; }
+      .top-title .left,.top-title .right{ white-space:normal; }
+    }
+
+    label{ display:block; font-size:13px; color:#666; margin-bottom:6px; }
+    input[type="text"], input[type="number"], input[type="date"], select, textarea{
+      width:100%;
+      padding:10px 10px;
+      border:1px solid #cfcfcf;
+      border-radius:10px;
+      font-size:16px;
+      outline:none;
+      background:#fff;
+    }
+    input[type="number"]{
+      text-align:left;
+    }
+    textarea{
+      min-height:74px;
+      resize:vertical;
+    }
+
+    .rowline{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:flex-end;
+    }
+    .rowline .grow{ flex:1 1 auto; }
+    .rowline .fixed{ width:140px; }
+    .rowline .fixed2{ width:160px; }
+
+    .chips{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .chip{
+      border:1px solid #cfcfcf;
+      background:#fff;
+      border-radius:12px;
+      padding:10px 12px;
+      cursor:pointer;
+      user-select:none;
+      font-size:14px;
+    }
+    .chip.active{
+      border-color:var(--dark);
+      box-shadow:0 0 0 2px rgba(0,0,0,.08) inset;
+      font-weight:800;
+    }
+
+    .section-title{
+      font-size:16px;
+      font-weight:900;
+      margin:4px 0 10px;
+    }
+    .hint{
+      color:#777;
+      font-size:13px;
+      margin-top:8px;
+    }
+
+    /* ===== Buttons ===== */
+    .buttons{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .btn{
+      border:none;
+      border-radius:12px;
+      padding:12px 14px;
+      font-size:15px;
+      cursor:pointer;
+      background:var(--btn);
+    }
+    .btn.primary{
+      background:var(--dark);
+      color:#fff;
+    }
+
+    /* ===== Modal preview ===== */
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:9999;
+    }
+    .modal.open{ display:flex; }
+    .modal-box{
+      background:#fff;
+      border-radius:14px;
+      width:min(980px,96vw);
+      max-height:92vh;
+      overflow:hidden;
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
+      display:flex;
+      flex-direction:column;
+    }
+    .modal-head{
+      padding:12px 14px;
+      border-bottom:1px solid #eee;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .modal-head strong{ font-size:15px; }
+    .modal-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+    .modal-body{
+      padding:12px;
+      overflow:auto;
+      background:#fafafa;
+    }
+    .modal-body img{
+      width:100%;
+      height:auto;
+      display:block;
+      border-radius:10px;
+      background:#fff;
+    }
+
+    /* ===== Stage (fora da tela) ===== */
+    #photoStage{
+      position:fixed;
+      left:-99999px;
+      top:0;
+      width:980px;
+      background:#fff;
+    }
+
+    /* ===== FOTO (imagem gerada) ===== */
+    .photo-card{
+      padding:18px 18px 14px;
+      background:#fff;
+      font-family: Arial, sans-serif;
+      color:#111;
+    }
+    .photo-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      padding-bottom:14px;
+      margin-bottom:14px;
+      border-bottom:1px solid #e7e7e7;
+    }
+    .photo-top .t-left{
+      font-size:34px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .photo-top .t-right{
+      font-size:26px;
+      color:var(--muted);
+      white-space:nowrap;
+      text-align:right;
+    }
+
+    .photo-msg{
+      font-size:22px;
+      margin:2px 0 14px;
+    }
+
+    .blocks{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+    }
+
+    .block{
+      border:1px solid var(--line);
+      border-radius:12px;
+      overflow:hidden;
+    }
+    .block .b-head{
+      background:var(--soft);
+      padding:10px 12px;
+      font-size:22px;
+      font-weight:900;
+    }
+    .block .b-body{
+      padding:12px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px 18px;
+      align-items:center;
+      font-size:22px;
+    }
+    .kv{
+      display:flex;
+      gap:10px;
+      align-items:baseline;
+      flex-wrap:wrap;
+    }
+    .kv .k{
+      color:#444;
+      min-width:64px;
+    }
+    .kv .v{
+      font-weight:900;
+      font-size:28px;
+    }
+    .kv .tag{
+      font-weight:900;
+      font-size:22px;
+      color:#111;
+    }
+
+    .block.single .b-body{
+      grid-template-columns: 1fr;
+    }
+
+    .photo-footer{
+      margin-top:14px;
+      color:#666;
+      font-size:16px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <div class="top-title">
+      <div class="left">Relatório de Carga</div>
+      <div class="right">Base / Top (imagem para WhatsApp)</div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <label>Saudação / Mensagem</label>
+        <input id="msg" type="text" placeholder="Bom dia" />
+        <div class="hint">Dica: pode deixar só “Bom dia” ou escrever algo curto.</div>
+      </div>
+
+      <div>
+        <label>Data da Fatia</label>
+        <div class="rowline">
+          <div class="grow">
+            <input id="fatiaData" type="date" />
+          </div>
+          <button class="btn" type="button" onclick="setHoje()">Hoje</button>
+          <button class="btn" type="button" onclick="setOntem()">Ontem</button>
+        </div>
+        <div class="hint">Na imagem aparece no formato 03/02.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carga geral -->
+  <div class="card">
+    <div class="section-title">Carga Geral</div>
+    <div class="grid2">
+      <div>
+        <label>Base (carga geral)</label>
+        <input id="cgBase" type="number" inputmode="numeric" min="0" step="1" placeholder="" />
+      </div>
+      <div>
+        <label>Top (carga geral)</label>
+        <input id="cgTop" type="number" inputmode="numeric" min="0" step="1" placeholder="" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Fatia -->
+  <div class="card">
+    <div class="section-title">Fatia (data selecionada)</div>
+    <div class="grid2">
+      <div>
+        <label>Base (fatia)</label>
+        <input id="ftBase" type="number" inputmode="numeric" min="0" step="1" placeholder="" />
+      </div>
+      <div>
+        <label>Top (fatia)</label>
+        <input id="ftTop" type="number" inputmode="numeric" min="0" step="1" placeholder="" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Fatia anterior -->
+  <div class="card">
+    <div class="section-title">Fatia anterior (opcional)</div>
+
+    <div class="rowline">
+      <div class="fixed2">
+        <label>Data anterior</label>
+        <input id="antData" type="date" />
+      </div>
+
+      <div class="fixed2">
+        <label>Top (anterior)</label>
+        <input id="antTop" type="number" inputmode="numeric" min="0" step="1" placeholder="" />
+      </div>
+
+      <div class="grow">
+        <label>Etiqueta (no clique)</label>
+        <div class="chips" id="tagChips">
+          <div class="chip active" data-tag="">Sem etiqueta</div>
+          <div class="chip" data-tag="reposição">(reposição)</div>
+          <div class="chip" data-tag="aguardando leitura">(aguardando leitura)</div>
+        </div>
+        <div class="hint">Aparece ao lado do valor do Top (ex.: “Top: 622 (reposição)”).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lotes especiais -->
+  <div class="card">
+    <div class="section-title">Lotes especiais (alerta de prioridade)</div>
+
+    <div class="rowline">
+      <div class="fixed2">
+        <label>Área</label>
+        <select id="leArea">
+          <option value="Top" selected>Top</option>
+          <option value="Base">Base</option>
+        </select>
+      </div>
+
+      <div class="fixed2">
+        <label>Documentos (qtd)</label>
+        <input id="leDocs" type="number" inputmode="numeric" min="0" step="1" placeholder="" />
+      </div>
+
+      <div class="fixed2">
+        <label>Total (pares)</label>
+        <input id="lePares" type="number" inputmode="numeric" min="0" step="1" placeholder="" />
+      </div>
+
+      <div class="grow">
+        <label>Observação (opcional)</label>
+        <input id="leObs" type="text" placeholder="Ex: Grendhas" />
+        <div class="hint">Na imagem fica: “Top 5 documentos – 240 pares (Grendhas)”</div>
+      </div>
+    </div>
+
+    <div class="hint">
+      Se quiser ocultar esse bloco, deixe Documentos e Pares vazios.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="buttons">
+      <button class="btn" type="button" onclick="limparTudo()">Limpar</button>
+      <button class="btn primary" type="button" onclick="abrirPreview()">Gerar Prévia</button>
+    </div>
+    <div class="hint" id="statusHint"></div>
+  </div>
+
+  <!-- Modal preview -->
+  <div class="modal" id="modal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <strong>Prévia da imagem</strong>
+        <div class="modal-actions">
+          <button class="btn" type="button" onclick="fecharPreview()">Fechar</button>
+          <button class="btn" type="button" onclick="baixarImagem()">Baixar</button>
+          <button class="btn primary" type="button" onclick="compartilharImagem()">Compartilhar (WhatsApp)</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <img id="previewImg" alt="Prévia do relatório" />
+      </div>
+    </div>
+  </div>
+
+  <div id="photoStage"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <script>
+    // ======= Storage =======
+    const KEY = "carga_app_v1";
+    const $ = (id)=>document.getElementById(id);
+
+    const statusHint = $("statusHint");
+    const modal = $("modal");
+    const previewImg = $("previewImg");
+    const photoStage = $("photoStage");
+    let lastBlob = null;
+
+    function pad2(n){ return String(n).padStart(2,"0"); }
+
+    function toISO(d){
+      const yyyy = d.getFullYear();
+      const mm = pad2(d.getMonth()+1);
+      const dd = pad2(d.getDate());
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function formatBRShort(iso){
+      // iso yyyy-mm-dd -> dd/mm
+      if (!iso || !iso.includes("-")) return "";
+      const [yyyy, mm, dd] = iso.split("-");
+      return `${dd}/${mm}`;
+    }
+
+    function formatBRFull(iso){
+      if (!iso || !iso.includes("-")) return "";
+      const [yyyy, mm, dd] = iso.split("-");
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    function formatGeradoEm(){
+      const now = new Date();
+      const dd = pad2(now.getDate());
+      const mm = pad2(now.getMonth()+1);
+      const yyyy = now.getFullYear();
+      const hh = pad2(now.getHours());
+      const mi = pad2(now.getMinutes());
+      const ss = pad2(now.getSeconds());
+      return `Gerado em ${dd}/${mm}/${yyyy}, ${hh}:${mi}:${ss}`;
+    }
+
+    function escapeHtml(str){
+      return (str || "").replace(/[&<>"']/g, (m)=>({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+
+    function getNum(id){
+      const v = $(id).value;
+      if (v === "" || v === null || v === undefined) return "";
+      const n = Number(v);
+      return Number.isFinite(n) ? n : "";
+    }
+
+    function setHoje(){
+      const d = new Date();
+      $("fatiaData").value = toISO(d);
+      saveState();
+    }
+    function setOntem(){
+      const d = new Date();
+      d.setDate(d.getDate()-1);
+      $("fatiaData").value = toISO(d);
+      saveState();
+    }
+
+    // ======= Etiquetas chips =======
+    let selectedTag = "";
+    function initChips(){
+      const wrap = $("tagChips");
+      const chips = Array.from(wrap.querySelectorAll(".chip"));
+      chips.forEach(ch=>{
+        ch.addEventListener("click", ()=>{
+          chips.forEach(c=>c.classList.remove("active"));
+          ch.classList.add("active");
+          selectedTag = ch.dataset.tag || "";
+          saveState();
+        });
+      });
+    }
+
+    function applyTag(tag){
+      selectedTag = tag || "";
+      const chips = Array.from($("tagChips").querySelectorAll(".chip"));
+      chips.forEach(ch=>{
+        ch.classList.toggle("active", (ch.dataset.tag||"") === selectedTag);
+      });
+    }
+
+    // ======= Save / Load =======
+    function saveState(){
+      const data = {
+        msg: $("msg").value || "",
+        fatiaData: $("fatiaData").value || "",
+        cgBase: $("cgBase").value || "",
+        cgTop: $("cgTop").value || "",
+        ftBase: $("ftBase").value || "",
+        ftTop: $("ftTop").value || "",
+        antData: $("antData").value || "",
+        antTop: $("antTop").value || "",
+        tag: selectedTag || "",
+        leArea: $("leArea").value || "Top",
+        leDocs: $("leDocs").value || "",
+        lePares: $("lePares").value || "",
+        leObs: $("leObs").value || ""
+      };
+      localStorage.setItem(KEY, JSON.stringify(data));
+    }
+
+    function loadState(){
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      try{
+        const d = JSON.parse(raw);
+        $("msg").value = d.msg ?? "Bom dia";
+        $("fatiaData").value = d.fatiaData ?? "";
+        $("cgBase").value = d.cgBase ?? "";
+        $("cgTop").value = d.cgTop ?? "";
+        $("ftBase").value = d.ftBase ?? "";
+        $("ftTop").value = d.ftTop ?? "";
+        $("antData").value = d.antData ?? "";
+        $("antTop").value = d.antTop ?? "";
+        $("leArea").value = d.leArea ?? "Top";
+        $("leDocs").value = d.leDocs ?? "";
+        $("lePares").value = d.lePares ?? "";
+        $("leObs").value = d.leObs ?? "";
+        applyTag(d.tag ?? "");
+      }catch(e){}
+    }
+
+    function limparTudo(){
+      $("msg").value = "Bom dia";
+      $("cgBase").value = "";
+      $("cgTop").value = "";
+      $("ftBase").value = "";
+      $("ftTop").value = "";
+      $("antTop").value = "";
+      $("leDocs").value = "";
+      $("lePares").value = "";
+      $("leObs").value = "";
+      $("leArea").value = "Top";
+
+      const today = new Date();
+      $("fatiaData").value = toISO(today);
+
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate()-1);
+      $("antData").value = toISO(yesterday);
+
+      applyTag("");
+      saveState();
+      statusHint.textContent = "";
+    }
+
+    // Autosave
+    function bindAutosave(){
+      const ids = ["msg","fatiaData","cgBase","cgTop","ftBase","ftTop","antData","antTop","leArea","leDocs","lePares","leObs"];
+      ids.forEach(id=>{
+        $(id).addEventListener("input", saveState);
+        $(id).addEventListener("change", saveState);
+      });
+    }
+
+    // ======= Build photo node =======
+    function buildPhotoNode(){
+      photoStage.innerHTML = "";
+
+      const msg = ($("msg").value || "Bom dia").trim();
+      const fatiaIso = $("fatiaData").value || "";
+      const fatiaShort = formatBRShort(fatiaIso);
+
+      const cgBase = getNum("cgBase");
+      const cgTop  = getNum("cgTop");
+      const ftBase = getNum("ftBase");
+      const ftTop  = getNum("ftTop");
+
+      const antIso = $("antData").value || "";
+      const antShort = formatBRShort(antIso);
+      const antTop = getNum("antTop");
+
+      const leArea = $("leArea").value || "Top";
+      const leDocs = getNum("leDocs");
+      const lePares = getNum("lePares");
+      const leObs = ($("leObs").value || "").trim();
+
+      // Montagem de etiqueta para a fatia anterior (Top)
+      const tagTxt = selectedTag ? ` (${selectedTag})` : "";
+
+      // Mostrar blocos só se tiver valor (pra não poluir)
+      const showCargaGeral = (cgBase !== "" || cgTop !== "");
+      const showFatia = (ftBase !== "" || ftTop !== "" || fatiaShort);
+      const showAnterior = (antTop !== "" && antShort);
+      const showLotes = (leDocs !== "" || lePares !== "" || leObs);
+
+      const wrap = document.createElement("div");
+      wrap.className = "photo-card";
+
+      wrap.innerHTML = `
+        <div class="photo-top">
+          <div class="t-left">Carga Geral</div>
+          <div class="t-right">Base / Top</div>
+        </div>
+
+        <div class="photo-msg">${escapeHtml(msg || "Bom dia")}</div>
+
+        <div class="blocks" id="blocks"></div>
+
+        <div class="photo-footer">${escapeHtml(formatGeradoEm())}</div>
+      `;
+
+      const blocks = wrap.querySelector("#blocks");
+
+      function addBlock(title, bodyHtml, single=false){
+        const b = document.createElement("div");
+        b.className = "block" + (single ? " single" : "");
+        b.innerHTML = `
+          <div class="b-head">${title}</div>
+          <div class="b-body">${bodyHtml}</div>
+        `;
+        blocks.appendChild(b);
+      }
+
+      if (showCargaGeral){
+        addBlock(
+          "CARGA GERAL",
+          `
+            <div class="kv"><span class="k">base:</span><span class="v">${escapeHtml(cgBase === "" ? "" : String(cgBase))}</span></div>
+            <div class="kv"><span class="k">top:</span><span class="v">${escapeHtml(cgTop === "" ? "" : String(cgTop))}</span></div>
+          `
+        );
+      }
+
+      if (showFatia){
+        addBlock(
+          `FATIA ${escapeHtml(fatiaShort || "")}`,
+          `
+            <div class="kv"><span class="k">base:</span><span class="v">${escapeHtml(ftBase === "" ? "" : String(ftBase))}</span></div>
+            <div class="kv"><span class="k">top:</span><span class="v">${escapeHtml(ftTop === "" ? "" : String(ftTop))}</span></div>
+          `
+        );
+      }
+
+      if (showAnterior){
+        addBlock(
+          `FATIA ${escapeHtml(antShort)}`,
+          `
+            <div class="kv">
+              <span class="k">Top:</span>
+              <span class="v">${escapeHtml(String(antTop))}</span>
+              <span class="tag">${escapeHtml(tagTxt)}</span>
+            </div>
+          `,
+          true
+        );
+      }
+
+      if (showLotes){
+        // Texto: "Top 5 documentos – 240 pares (Grendhas)"
+        const docsTxt = (leDocs === "" ? "" : String(leDocs));
+        const paresTxt = (lePares === "" ? "" : String(lePares));
+        const obsTxt = leObs ? ` (${leObs})` : "";
+        const linha = `${leArea} ${docsTxt} documentos – ${paresTxt} pares${obsTxt}`.trim();
+
+        addBlock(
+          "LOTES ESPECIAIS",
+          `<div class="kv"><span class="v" style="font-size:24px">${escapeHtml(linha)}</span></div>`,
+          true
+        );
+      }
+
+      // Se nada preenchido, pelo menos mostra um bloco vazio amigável
+      if (!showCargaGeral && !showFatia && !showAnterior && !showLotes){
+        addBlock("AVISO", `<div class="kv"><span class="v" style="font-size:24px">Preencha os campos para gerar a imagem.</span></div>`, true);
+      }
+
+      photoStage.appendChild(wrap);
+      return wrap;
+    }
+
+    // ======= Preview / Share =======
+    async function abrirPreview(){
+      lastBlob = null;
+      statusHint.textContent = "Gerando prévia...";
+      try{
+        const node = buildPhotoNode();
+        const canvas = await 
